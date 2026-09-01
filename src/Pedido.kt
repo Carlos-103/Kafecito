@@ -14,7 +14,7 @@ enum class EstadoPedido {
     EN_PREPARACION, LISTO, ENTREGADO
 }
 
-data class ItemPedido(
+data class DetallePedido(
     val producto: Producto,
     val cantidad: Int
 )
@@ -22,10 +22,28 @@ data class ItemPedido(
 data class Pedido(
     val id: Int,
     val cliente: String,
-    val items: MutableList<ItemPedido> = mutableListOf(),
+    val detalles: MutableList<DetallePedido> = mutableListOf(),
     var estado: EstadoPedido = EstadoPedido.EN_PREPARACION
 ) {
-    fun calcularTotal(): Double = items.sumOf { it.producto.precio * it.cantidad }
+    //Calcula el detalle del peido
+    fun calcularTotal(): Double {
+        return try {
+            detalles.sumOf{it.producto.precio*it.cantidad}
+        }catch (e: Exception){
+            Logger.registrarError("Pedido", "Erro al calcular detalle pedido")
+        }
+    }
+    //Agregar producto y su cantidad al pedido actual
+    fun agregarProducto(){
+        try{
+            require(cantidad>0){"La cantidad debe ser mayor a 0"}
+            detalles.add(DetallePedido(producto,cantidad))
+            println("Producto '${producto.nombre}'(x$cantidad) agregado al pedido #$id")
+        }catch (e:Exception){
+            Logger.registrarError("Pedido","Error al agregar al pedido #$id: ${e.message}")
+            println("Error: ${e.message}")
+        }
+    }
 }
 
 class GestorPedidos {
