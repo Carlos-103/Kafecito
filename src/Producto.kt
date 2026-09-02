@@ -14,63 +14,229 @@ data class Producto(
     val id: Int,
     var nombre: String,
     var precio: Double,
-    var categoria: String,
-    var disponible: Boolean = true
+    var categoria: String
 )
 
 class GestorProductos {
 
-    // Manejo de colecciones: aquí se guardan todos los productos
-    private val productos = mutableListOf<Producto>()
+    private val productos =
+        mutableListOf<Producto>()
+
     private var siguienteId = 1
 
-    fun agregarProducto(nombre: String, precio: Double, categoria: String) {
-        try {
-            require(nombre.isNotBlank()) { "El nombre no puede estar vacío" }
-            require(precio > 0) { "El precio debe ser mayor a 0" }
+    /**
+     * Agrega un nuevo producto.
+     */
+    fun agregarProducto(
+        nombre: String,
+        precio: Double,
+        categoria: String
+    ): Producto? {
 
-            val nuevo = Producto(siguienteId, nombre, precio, categoria)
+        return try {
+
+            require(nombre.isNotBlank()) {
+                "El nombre no puede estar vacío"
+            }
+
+            require(precio > 0) {
+                "El precio debe ser mayor que 0"
+            }
+
+            require(categoria.isNotBlank()) {
+                "La categoría no puede estar vacía"
+            }
+
+            val nuevo = Producto(
+                id = siguienteId,
+                nombre = nombre,
+                precio = precio,
+                categoria = categoria
+            )
+
             productos.add(nuevo)
+
             siguienteId++
-            println("Producto agregado: $nuevo")
+
+            println()
+            println("✅ Producto agregado correctamente.")
+            println("ID: ${nuevo.id}")
+            println("Nombre: ${nuevo.nombre}")
+            println("Precio: $${"%.2f".format(nuevo.precio)}")
+            println("Categoría: ${nuevo.categoria}")
+
+            nuevo
+
         } catch (e: Exception) {
-            Logger.registrarError("Producto", "Error al agregar producto: ${e.message}")
+
+            Logger.registrarError(
+                "Producto",
+                "Error al agregar producto: ${e.message}"
+            )
+
             println("Error: ${e.message}")
+
+            null
         }
     }
 
+    /**
+     * Lista productos sin mostrar inventario.
+     */
     fun listarProductos() {
+
         if (productos.isEmpty()) {
-            println("No hay productos registrados.")
+
+            println(
+                "No hay productos registrados."
+            )
+
             return
         }
-        productos.forEach { println(it) }
+
+        println()
+        println("========== PRODUCTOS ==========")
+
+        productos.forEach { producto ->
+
+            println(
+                "ID: ${producto.id} | " +
+                        "${producto.nombre} | " +
+                        "$${"%.2f".format(producto.precio)} | " +
+                        "${producto.categoria}"
+            )
+        }
+
+        println("===============================")
     }
 
-    fun actualizarProducto(id: Int, nuevoPrecio: Double) {
+    /**
+     * Lista productos mostrando stock.
+     */
+    fun listarProductos(
+        inventario: GestorInventario
+    ) {
+
+        if (productos.isEmpty()) {
+
+            println(
+                "No hay productos registrados."
+            )
+
+            return
+        }
+
+        println()
+        println("========== MENÚ KAFECITO ==========")
+
+        productos.forEach { producto ->
+
+            val stock =
+                inventario.consultarStock(producto.id)
+
+            println("-----------------------------------")
+            println("ID: ${producto.id}")
+            println("Producto: ${producto.nombre}")
+            println("Categoría: ${producto.categoria}")
+            println(
+                "Precio: $${"%.2f".format(producto.precio)}"
+            )
+
+            if (stock > 0) {
+
+                println(
+                    "Disponibilidad: $stock unidades"
+                )
+
+            } else {
+
+                println(
+                    "Disponibilidad: ❌ NO DISPONIBLE"
+                )
+            }
+        }
+
+        println("-----------------------------------")
+    }
+
+    /**
+     * Actualiza el precio de un producto.
+     */
+    fun actualizarProducto(
+        id: Int,
+        nuevoPrecio: Double
+    ) {
+
         try {
-            val producto = productos.find { it.id == id }
-                ?: throw NoSuchElementException("No existe un producto con id $id")
-            require(nuevoPrecio > 0) { "El precio debe ser mayor a 0" }
+
+            val producto =
+                productos.find { it.id == id }
+                    ?: throw NoSuchElementException(
+                        "No existe un producto con ID $id"
+                    )
+
+            require(nuevoPrecio > 0) {
+                "El precio debe ser mayor que 0"
+            }
+
             producto.precio = nuevoPrecio
-            println("Producto actualizado: $producto")
+
+            println(
+                "✅ Producto actualizado:"
+            )
+
+            println(producto)
+
         } catch (e: Exception) {
-            Logger.registrarError("Producto", "Error al actualizar producto: ${e.message}")
+
+            Logger.registrarError(
+                "Producto",
+                "Error al actualizar producto: ${e.message}"
+            )
+
             println("Error: ${e.message}")
         }
     }
 
-    fun eliminarProducto(id: Int) {
+    /**
+     * Elimina un producto.
+     */
+    fun eliminarProducto(
+        id: Int
+    ) {
+
         try {
-            val eliminado = productos.removeIf { it.id == id }
-            if (!eliminado) throw NoSuchElementException("No existe un producto con id $id")
-            println("Producto eliminado correctamente.")
+
+            val eliminado =
+                productos.removeIf {
+                    it.id == id
+                }
+
+            if (!eliminado) {
+
+                throw NoSuchElementException(
+                    "No existe un producto con ID $id"
+                )
+            }
+
+            println(
+                "✅ Producto eliminado correctamente."
+            )
+
         } catch (e: Exception) {
-            Logger.registrarError("Producto", "Error al eliminar producto: ${e.message}")
+
+            Logger.registrarError(
+                "Producto",
+                "Error al eliminar producto: ${e.message}"
+            )
+
             println("Error: ${e.message}")
         }
     }
 
-    // Útil para que el módulo de Reportes (José Antonio) pueda leer los datos
-    fun obtenerProductos(): List<Producto> = productos
+    /**
+     * Devuelve todos los productos.
+     */
+    fun obtenerProductos(): List<Producto> =
+        productos
 }
