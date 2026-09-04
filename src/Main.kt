@@ -47,6 +47,11 @@ fun menuAdmin(
             |1. Agregar producto
             |2. Listar productos
             |3. Ver resumen / reportes
+            |4. Buscar producto por nombre
+            |5. Listar solo disponibles
+            |6. Listar por categoría
+            |7. Marcar producto como agotado
+            |8. Marcar producto como disponible
             |0. Salir
             """.trimMargin()
         )
@@ -59,6 +64,23 @@ fun menuAdmin(
             }
             "2" -> gestorProductos.listarProductos()
             "3" -> gestorReportes.mostrarResumenGeneral()
+            "4" -> {
+                print("Nombre a buscar: "); val nombre = readLine().orEmpty()
+                gestorProductos.buscarPorNombre(nombre)
+            }
+            "5" -> gestorProductos.listarDisponibles()
+            "6" -> {
+                print("Categoría: "); val categoria = readLine().orEmpty()
+                gestorProductos.listarPorCategoria(categoria)
+            }
+            "7" -> {
+                print("ID del producto: "); val id = readLine()?.toIntOrNull() ?: -1
+                gestorProductos.marcarNoDisponible(id)
+            }
+            "8" -> {
+                print("ID del producto: "); val id = readLine()?.toIntOrNull() ?: -1
+                gestorProductos.marcarDisponible(id)
+            }
             "0" -> salir = true
             else -> println("Opción inválida")
         }
