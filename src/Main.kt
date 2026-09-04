@@ -1,10 +1,8 @@
 // ====================================================================
 // MAIN.kt  -- Punto de entrada / INTEGRACIÓN de todos los módulos
-// Responsable:
 // ====================================================================
 // Aquí se conectan todos los módulos y se arma el menú según el ROL
-// del usuario que inició sesión. NO muevas las clases de otros
-// archivos aquí; solo se usan (import implícito, mismo proyecto).
+// del usuario que inició sesión.
 
 fun main() {
 
@@ -164,7 +162,6 @@ fun main() {
 // ====================================================================
 // MENÚ ADMINISTRADOR
 // ====================================================================
-
 fun menuAdmin(
     gestorProductos: GestorProductos,
     gestorInventario: GestorInventario,
@@ -184,15 +181,20 @@ fun menuAdmin(
             |2. Listar productos
             |3. Ver inventario
             |4. Ver resumen / reportes
+            |5. Buscar producto por nombre
+            |6. Listar solo disponibles
+            |7. Listar por categoría
+            |8. Marcar producto como agotado
+            |9. Marcar producto como disponible
             |0. Salir
-            |========================================
+            |=========================================
             """.trimMargin()
         )
 
         when (readLine()) {
 
             // ========================================================
-            // AGREGAR PRODUCTO
+            // AGREGAR PRODUCTO (con stock inicial)
             // ========================================================
 
             "1" -> {
@@ -243,7 +245,7 @@ fun menuAdmin(
             }
 
             // ========================================================
-            // LISTAR PRODUCTOS
+            // LISTAR PRODUCTOS (con inventario)
             // ========================================================
 
             "2" -> {
@@ -272,6 +274,59 @@ fun menuAdmin(
             }
 
             // ========================================================
+            // BUSCAR POR NOMBRE
+            // ========================================================
+
+            "5" -> {
+
+                print("Nombre a buscar: ")
+                val nombre = readLine().orEmpty()
+                gestorProductos.buscarPorNombre(nombre)
+            }
+
+            // ========================================================
+            // LISTAR DISPONIBLES
+            // ========================================================
+
+            "6" -> {
+
+                gestorProductos.listarDisponibles()
+            }
+
+            // ========================================================
+            // LISTAR POR CATEGORÍA
+            // ========================================================
+
+            "7" -> {
+
+                print("Categoría: ")
+                val categoria = readLine().orEmpty()
+                gestorProductos.listarPorCategoria(categoria)
+            }
+
+            // ========================================================
+            // MARCAR NO DISPONIBLE
+            // ========================================================
+
+            "8" -> {
+
+                print("ID del producto: ")
+                val id = readLine()?.toIntOrNull() ?: -1
+                gestorProductos.marcarNoDisponible(id)
+            }
+
+            // ========================================================
+            // MARCAR DISPONIBLE
+            // ========================================================
+
+            "9" -> {
+
+                print("ID del producto: ")
+                val id = readLine()?.toIntOrNull() ?: -1
+                gestorProductos.marcarDisponible(id)
+            }
+
+            // ========================================================
             // SALIR
             // ========================================================
 
@@ -293,6 +348,7 @@ fun menuAdmin(
         }
     }
 }
+
 
 
 // ====================================================================
