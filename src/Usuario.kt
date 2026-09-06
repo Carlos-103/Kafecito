@@ -13,6 +13,15 @@ enum class Rol {
     ADMIN, EMPLEADO, CLIENTE
 }
 
+/**
+ * Indica si este rol tiene permiso para modificar el inventario
+ * (agregar stock, marcar productos como agotados, etc.).
+ * Solo ADMIN y EMPLEADO pueden hacerlo; CLIENTE nunca.
+ */
+fun Rol.puedeModificarInventario(): Boolean {
+    return this == Rol.ADMIN || this == Rol.EMPLEADO
+}
+
 data class Usuario(
     val nombre: String,
     val contrasena: String,
@@ -36,6 +45,17 @@ class GestorUsuarios {
             Logger.registrarError("Usuario", "Error al registrar usuario: ${e.message}")
             println("Error: ${e.message}")
         }
+    }
+
+    /**
+     * Registro público (ej. desde el menú inicial de Main.kt).
+     * Todo usuario que se registra por su cuenta entra como CLIENTE
+     * por defecto; no puede elegir su propio rol. Solo un ADMIN
+     * podría crear usuarios EMPLEADO/ADMIN usando la función de
+     * arriba desde un menú administrativo si se implementa después.
+     */
+    fun registrarUsuario(nombre: String, contrasena: String) {
+        registrarUsuario(nombre, contrasena, Rol.CLIENTE)
     }
 
     fun iniciarSesion(nombre: String, contrasena: String): Usuario? {
