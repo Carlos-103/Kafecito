@@ -101,59 +101,131 @@ fun main() {
     }
 
     // ================================================================
-    // LOGIN
+    // BUCLE PRINCIPAL: LOGIN / REGISTRO / LOGOUT
     // ================================================================
+    // Este bucle permite que, al salir del menú de un rol (logout),
+    // el programa regrese a la pantalla de bienvenida en vez de
+    // cerrarse. Solo termina cuando el usuario elige "3. Salir".
 
-    println()
-    println("====================================")
-    println("        BIENVENIDO A KAFECITO")
-    println("====================================")
+    var continuarPrograma = true
 
-    print("Usuario: ")
-    val nombre =
-        readLine().orEmpty()
+    while (continuarPrograma) {
 
-    print("Contraseña: ")
-    val contrasena =
-        readLine().orEmpty()
+        println()
+        println("====================================")
+        println("        BIENVENIDO A KAFECITO")
+        println("====================================")
+        println("1. Iniciar sesión")
+        println("2. Registrarse (como cliente)")
+        println("3. Salir del programa")
+        print("Seleccione una opción: ")
 
-    val usuario =
-        gestorUsuarios.iniciarSesion(
-            nombre,
-            contrasena
-        ) ?: return
+        val opcionInicial = readLine()
 
-    // ================================================================
-    // MENÚ SEGÚN ROL
-    // ================================================================
+        when (opcionInicial) {
 
-    when (usuario.rol) {
+            "1" -> {
 
-        Rol.ADMIN -> {
+                print("Usuario: ")
+                val nombre =
+                    readLine().orEmpty()
 
-            menuAdmin(
-                gestorProductos,
-                gestorInventario,
-                gestorReportes
-            )
-        }
+                print("Contraseña: ")
+                val contrasena =
+                    readLine().orEmpty()
 
-        Rol.EMPLEADO -> {
+                val usuario =
+                    gestorUsuarios.iniciarSesion(
+                        nombre,
+                        contrasena
+                    )
 
-            menuEmpleado(
-                gestorPedidos,
-                gestorInventario
-            )
-        }
+                if (usuario == null) {
 
-        Rol.CLIENTE -> {
+                    // El mensaje de error ya lo imprime iniciarSesion().
+                    // Volvemos a mostrar el menú de bienvenida.
 
-            menuCliente(
-                gestorProductos,
-                gestorPedidos,
-                gestorInventario,
-                usuario
-            )
+                } else {
+
+                    // ================================================
+                    // MENÚ SEGÚN ROL (al salir de aquí = logout)
+                    // ================================================
+
+                    when (usuario.rol) {
+
+                        Rol.ADMIN -> {
+
+                            menuAdmin(
+                                gestorProductos,
+                                gestorInventario,
+                                gestorReportes,
+                                usuario
+                            )
+                        }
+
+                        Rol.EMPLEADO -> {
+
+                            menuEmpleado(
+                                gestorPedidos,
+                                gestorInventario,
+                                usuario
+                            )
+                        }
+
+                        Rol.CLIENTE -> {
+
+                            menuCliente(
+                                gestorProductos,
+                                gestorPedidos,
+                                gestorInventario,
+                                usuario
+                            )
+                        }
+                    }
+
+                    println()
+                    println(
+                        "👋 Sesión cerrada. Volviendo al menú de bienvenida..."
+                    )
+                }
+            }
+
+            "2" -> {
+
+                print("Nombre de usuario: ")
+                val nuevoNombre =
+                    readLine().orEmpty()
+
+                print("Contraseña: ")
+                val nuevaContrasena =
+                    readLine().orEmpty()
+
+                // No se pide rol: todo registro público entra como CLIENTE.
+                gestorUsuarios.registrarUsuario(
+                    nuevoNombre,
+                    nuevaContrasena
+                )
+
+                println(
+                    "Ahora puedes iniciar sesión con tu nuevo usuario."
+                )
+            }
+
+            "3" -> {
+
+                continuarPrograma = false
+
+                println(
+                    "Gracias por usar Kafecito. ¡Hasta pronto!"
+                )
+            }
+
+            else -> {
+
+                println(
+                    "❌ Opción inválida."
+                )
+            }
         }
     }
 }
@@ -165,7 +237,8 @@ fun main() {
 fun menuAdmin(
     gestorProductos: GestorProductos,
     gestorInventario: GestorInventario,
-    gestorReportes: GestorReportes
+    gestorReportes: GestorReportes,
+    usuario: Usuario
 ) {
 
     var salir = false
@@ -186,6 +259,7 @@ fun menuAdmin(
             |7. Listar por categoría
             |8. Marcar producto como agotado
             |9. Marcar producto como disponible
+            |10. Agregar stock a un producto
             |0. Salir
             |=========================================
             """.trimMargin()
@@ -327,6 +401,30 @@ fun menuAdmin(
             }
 
             // ========================================================
+            // AGREGAR STOCK (solo ADMIN / EMPLEADO)
+            // ========================================================
+
+            "10" -> {
+
+                if (!usuario.rol.puedeModificarInventario()) {
+
+                    println(
+                        "❌ No tienes permiso para modificar el inventario."
+                    )
+
+                } else {
+
+                    print("ID del producto: ")
+                    val id = readLine()?.toIntOrNull() ?: -1
+
+                    print("Cantidad a agregar: ")
+                    val cantidad = readLine()?.toIntOrNull() ?: -1
+
+                    gestorInventario.agregarStock(id, cantidad)
+                }
+            }
+
+            // ========================================================
             // SALIR
             // ========================================================
 
@@ -357,7 +455,8 @@ fun menuAdmin(
 
 fun menuEmpleado(
     gestorPedidos: GestorPedidos,
-    gestorInventario: GestorInventario
+    gestorInventario: GestorInventario,
+    usuario: Usuario
 ) {
 
     var salir = false
@@ -371,6 +470,7 @@ fun menuEmpleado(
             |========== MENÚ EMPLEADO ==========
             |1. Ver inventario
             |2. Actualizar estado de un pedido
+            |3. Agregar stock a un producto
             |0. Salir
             |===================================
             """.trimMargin()
@@ -444,6 +544,26 @@ fun menuEmpleado(
                 }
             }
 
+            "3" -> {
+
+                if (!usuario.rol.puedeModificarInventario()) {
+
+                    println(
+                        "❌ No tienes permiso para modificar el inventario."
+                    )
+
+                } else {
+
+                    print("ID del producto: ")
+                    val id = readLine()?.toIntOrNull() ?: -1
+
+                    print("Cantidad a agregar: ")
+                    val cantidad = readLine()?.toIntOrNull() ?: -1
+
+                    gestorInventario.agregarStock(id, cantidad)
+                }
+            }
+
             "0" -> {
 
                 salir = true
@@ -463,20 +583,19 @@ fun menuEmpleado(
 // ====================================================================
 // MENÚ CLIENTE
 // ====================================================================
-
 fun menuCliente(
     gestorProductos: GestorProductos,
     gestorPedidos: GestorPedidos,
     gestorInventario: GestorInventario,
     usuario: Usuario
 ) {
-
+ 
     var salir = false
-
+ 
     while (!salir) {
-
+ 
         println()
-
+ 
         println(
             """
             |============ MENÚ CLIENTE ============
@@ -487,26 +606,26 @@ fun menuCliente(
             |=======================================
             """.trimMargin()
         )
-
+ 
         when (readLine()) {
-
+ 
             // ========================================================
             // VER MENÚ
             // ========================================================
-
+ 
             "1" -> {
-
+ 
                 gestorProductos.listarProductos(
                     gestorInventario
                 )
             }
-
+ 
             // ========================================================
             // REALIZAR PEDIDO
             // ========================================================
-
+ 
             "2" -> {
-
+ 
                 realizarPedido(
                     gestorProductos,
                     gestorPedidos,
@@ -514,48 +633,48 @@ fun menuCliente(
                     usuario
                 )
             }
-
+ 
             // ========================================================
             // CONSULTAR PEDIDO
             // ========================================================
-
+ 
             "3" -> {
-
+ 
                 print("ID de pedido: ")
-
+ 
                 val id =
                     readLine()
                         ?.toIntOrNull()
                         ?: -1
-
+ 
                 val estado =
                     gestorPedidos.consultarEstado(id)
-
+ 
                 if (estado == null) {
-
+ 
                     println(
                         "❌ No existe el pedido #$id."
                     )
-
+ 
                 } else {
-
+ 
                     println(
                         "Pedido #$id"
                     )
-
+ 
                     println(
                         "Estado: $estado"
                     )
                 }
             }
-
+ 
             "0" -> {
-
+ 
                 salir = true
             }
-
+ 
             else -> {
-
+ 
                 println(
                     "❌ Opción inválida."
                 )
@@ -563,65 +682,65 @@ fun menuCliente(
         }
     }
 }
-
-
+ 
+ 
 // ====================================================================
 // REALIZAR PEDIDO
 // ====================================================================
-
+ 
 fun realizarPedido(
     gestorProductos: GestorProductos,
     gestorPedidos: GestorPedidos,
     gestorInventario: GestorInventario,
     usuario: Usuario
 ) {
-
+ 
     val productos =
         gestorProductos.obtenerProductos()
-
+ 
     if (productos.isEmpty()) {
-
+ 
         println(
             "No hay productos registrados."
         )
-
+ 
         return
     }
-
+ 
     // ================================================================
     // CARRITO TEMPORAL
     // ================================================================
-
+ 
     val carrito =
         mutableListOf<ItemPedido>()
-
+ 
     var continuar = true
-
+ 
     while (continuar) {
-
+ 
         println()
         println(
             "========== PRODUCTOS =========="
         )
-
+ 
         productos.forEach { producto ->
-
+ 
             val stock =
                 gestorInventario.consultarStock(
                     producto.id
                 )
-
+ 
             if (stock > 0) {
-
+ 
                 println(
                     "${producto.id}. " +
                             "${producto.nombre} - " +
                             "$${"%.2f".format(producto.precio)} " +
                             "- Disponible: $stock"
                 )
-
+ 
             } else {
-
+ 
                 println(
                     "${producto.id}. " +
                             "${producto.nombre} - " +
@@ -629,141 +748,141 @@ fun realizarPedido(
                 )
             }
         }
-
+ 
         println()
         println("0. Terminar selección")
-
+ 
         print(
             "Ingrese ID del producto: "
         )
-
+ 
         val idProducto =
             readLine()
                 ?.toIntOrNull()
-
+ 
         if (idProducto == 0) {
-
+ 
             continuar = false
-
+ 
         } else if (idProducto == null) {
-
+ 
             println(
                 "❌ ID inválido."
             )
-
+ 
         } else {
-
+ 
             val producto =
                 productos.find {
                     it.id == idProducto
                 }
-
+ 
             if (producto == null) {
-
+ 
                 println(
                     "❌ No existe un producto con ID $idProducto."
                 )
-
+ 
             } else {
-
+ 
                 val stock =
                     gestorInventario.consultarStock(
                         producto.id
                     )
-
+ 
                 if (stock == 0) {
-
+ 
                     println()
                     println(
                         "❌ PRODUCTO NO DISPONIBLE"
                     )
-
+ 
                     println(
                         "${producto.nombre} está agotado."
                     )
-
+ 
                 } else {
-
+ 
                     print(
                         "Cantidad de ${producto.nombre}: "
                     )
-
+ 
                     val cantidad =
                         readLine()
                             ?.toIntOrNull()
-
+ 
                     if (cantidad == null ||
                         cantidad <= 0
                     ) {
-
+ 
                         println(
                             "❌ Cantidad inválida."
                         )
-
+ 
                     } else if (cantidad > stock) {
-
+ 
                         println()
                         println(
                             "❌ No hay suficiente stock."
                         )
-
+ 
                         println(
                             "Disponible: $stock unidades."
                         )
-
+ 
                     } else {
-
+ 
                         // ====================================================
                         // BUSCAR SI YA ESTÁ EN EL CARRITO
                         // ====================================================
-
+ 
                         val existente =
                             carrito.find {
                                 it.producto.id ==
                                         producto.id
                             }
-
+ 
                         if (existente != null) {
-
+ 
                             val nuevaCantidad =
                                 existente.cantidad +
                                         cantidad
-
+ 
                             if (nuevaCantidad > stock) {
-
+ 
                                 println(
                                     "❌ La cantidad total " +
                                             "supera el stock disponible."
                                 )
-
+ 
                             } else {
-
+ 
                                 carrito.remove(
                                     existente
                                 )
-
+ 
                                 carrito.add(
                                     ItemPedido(
                                         producto,
                                         nuevaCantidad
                                     )
                                 )
-
+ 
                                 println(
                                     "✅ Cantidad actualizada " +
                                             "en el carrito."
                                 )
                             }
-
+ 
                         } else {
-
+ 
                             carrito.add(
                                 ItemPedido(
                                     producto,
                                     cantidad
                                 )
                             )
-
+ 
                             println(
                                 "✅ Producto agregado al carrito."
                             )
@@ -773,76 +892,77 @@ fun realizarPedido(
             }
         }
     }
-
+ 
     // ================================================================
     // SI EL CARRITO ESTÁ VACÍO
     // ================================================================
-
+ 
     if (carrito.isEmpty()) {
-
+ 
         println(
             "El carrito está vacío."
         )
-
+ 
         return
     }
-
+ 
     // ================================================================
     // MOSTRAR CARRITO
     // ================================================================
-
+ 
     println()
     println("====================================")
     println("             CARRITO")
     println("====================================")
-
+ 
     carrito.forEach { item ->
-
+ 
         println(
             "${item.cantidad} x " +
                     "${item.producto.nombre} = " +
                     "$${"%.2f".format(item.calcularSubtotal())}"
         )
     }
-
+ 
     val total =
         carrito.sumOf {
             it.calcularSubtotal()
         }
-
+ 
     println("------------------------------------")
-
+ 
     println(
         "TOTAL: $${"%.2f".format(total)}"
     )
-
+ 
     println("====================================")
-
+ 
     // ================================================================
     // CONFIRMAR PEDIDO
     // ================================================================
-
+ 
     print(
         "¿Desea confirmar el pedido? (S/N): "
     )
-
+ 
     val confirmar =
         readLine()
             ?.trim()
             ?.uppercase()
-
+ 
     if (confirmar == "S") {
-
+ 
         gestorPedidos.crearPedidoConInventario(
             usuario.nombre,
             carrito,
             gestorInventario
         )
-
+ 
     } else {
-
+ 
         println(
             "Pedido cancelado."
         )
     }
 }
+ 
