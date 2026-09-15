@@ -17,7 +17,10 @@ class GestorReportes(
             println("===== RESUMEN DEL SISTEMA =====")
 
             val pedidos = gestorPedidos.obtenerPedidos()
-            val totalVentas = pedidos.sumOf { it.calcularTotal() }
+            var totalVentas = 0.0
+            for (pedido in pedidos) {
+                totalVentas += pedido.calcularTotal()
+            }
 
             println("Total de pedidos: ${pedidos.size}")
             println("Total vendido: $${"%.2f".format(totalVentas)}")
@@ -48,21 +51,36 @@ class GestorReportes(
             println("\nAún no hay pedidos para calcular el producto más vendido.")
             return
         }
+        val nombres = mutableListOf<String>()
+        val cantidades = mutableListOf<Int>()
 
-        val ventasPorProducto = mutableMapOf<String, Int>()
-
-        pedidos.forEach { pedido ->
-            pedido.items.forEach { item ->
+        for (pedido in pedidos) {
+            for (item in pedido.items) {
                 val nombre = item.producto.nombre
-                ventasPorProducto[nombre] = (ventasPorProducto[nombre] ?: 0) + item.cantidad
+                val indice = nombres.indexOf(nombre)
+
+                if (indice == -1) {
+                    nombres.add(nombre)
+                    cantidades.add(item.cantidad)
+                } else {
+                    cantidades[indice] = cantidades[indice] + item.cantidad
+                }
             }
         }
 
-        val masVendido = ventasPorProducto.maxByOrNull { it.value }
-
-        if (masVendido != null) {
-            println("\nProducto más vendido: ${masVendido.key} (${masVendido.value} unidades)")
+        if (nombres.isEmpty()) {
+            return
         }
+
+        var indiceMax = 0
+        for (i in 1 until cantidades.size) {
+            if (cantidades[i] > cantidades[indiceMax]) {
+                indiceMax = i
+            }
+        }
+
+        println("\nProducto más vendido: ${nombres[indiceMax]} (${cantidades[indiceMax]} unidades)")
+
     }
 
     /**
@@ -71,9 +89,10 @@ class GestorReportes(
     private fun mostrarValorInventario() {
         val productos = gestorProductos.obtenerProductos()
 
-        val valorTotal = productos.sumOf { producto ->
+        var valorTotal = 0.0
+        for (producto in productos) {
             val stock = gestorInventario.consultarStock(producto.id)
-            producto.precio * stock
+            valorTotal += producto.precio * stock
         }
 
         println("\nValor total del inventario: $${"%.2f".format(valorTotal)}")
@@ -85,8 +104,12 @@ class GestorReportes(
     private fun mostrarProductosAgotados() {
         val productos = gestorProductos.obtenerProductos()
 
-        val agotados = productos.filter { producto ->
-            !producto.disponible || gestorInventario.consultarStock(producto.id) == 0
+        val agotados = mutableListOf<Producto>()
+        for (producto in productos) {
+            val stock = gestorInventario.consultarStock(producto.id)
+            if (!producto.disponible || stock == 0) {
+                agotados.add(producto)
+            }
         }
 
         if (agotados.isEmpty()) {
@@ -106,18 +129,20 @@ class GestorReportes(
     private fun mostrarStockBajo(umbral: Int = 5) {
         val productos = gestorProductos.obtenerProductos()
 
-        val stockBajo = productos.filter { producto ->
+        val stockBajo = mutableListOf<Producto>()
+        for (producto in productos) {
             val stock = gestorInventario.consultarStock(producto.id)
-            stock in 1..umbral
+            if (stock in 1..umbral) {
+                stockBajo.add(producto)
+            }
         }
-
         if (stockBajo.isEmpty()) {
             println("\nProductos con stock bajo: ninguno.")
             return
         }
 
         println("\n⚠ Productos con stock bajo (${stockBajo.size}):")
-        stockBajo.forEach { producto ->
+        for (producto in stockBajo) {
             val stock = gestorInventario.consultarStock(producto.id)
             println("- ${producto.nombre}: $stock unidades")
         }
@@ -134,13 +159,28 @@ class GestorReportes(
             return
         }
 
-        val porCategoria = productos.groupBy { it.categoria }
+        val categorias = mutableListOf<String>()
+        val cantidadPorCategoria = mutableListOf<Int>()
+        val stockPorCategoria = mutableListOf<Int>()
+
+        for (producto in productos) {
+            val stock = gestorInventario.consultarStock(producto.id)
+            val indice = categorias.indexOf(producto.categoria)
+
+            if (indice == -1) {
+                categorias.add(producto.categoria)
+                cantidadPorCategoria.add(1)
+                stockPorCategoria.add(stock)
+            } else {
+                cantidadPorCategoria[indice] = cantidadPorCategoria[indice] + 1
+                stockPorCategoria[indice] = stockPorCategoria[indice] + stock
+            }
+        }
 
         println("\n===== RESUMEN POR CATEGORÍA =====")
 
-        porCategoria.forEach { (categoria, listaProductos) ->
-            val stockCategoria = listaProductos.sumOf { gestorInventario.consultarStock(it.id) }
-            println("$categoria: ${listaProductos.size} producto(s), $stockCategoria unidad(es) en stock")
+        for (i in categorias.indices) {
+            println("${categorias[i]}: ${cantidadPorCategoria[i]} producto(s), ${stockPorCategoria[i]} unidad(es) en stock")
         }
     }
 
@@ -155,12 +195,24 @@ class GestorReportes(
             return
         }
 
-        val porEstado = pedidos.groupBy { it.estado }
+        val estados = mutableListOf<EstadoPedido>()
+        val cantidadPorEstado = mutableListOf<Int>()
+
+        for (pedido in pedidos) {
+            val indice = estados.indexOf(pedido.estado)
+
+            if (indice == -1) {
+                estados.add(pedido.estado)
+                cantidadPorEstado.add(1)
+            } else {
+                cantidadPorEstado[indice] = cantidadPorEstado[indice] + 1
+            }
+        }
 
         println("\n===== PEDIDOS POR ESTADO =====")
 
-        porEstado.forEach { (estado, lista) ->
-            println("$estado: ${lista.size} pedido(s)")
+        for (i in estados.indices) {
+            println("${estados[i]}: ${cantidadPorEstado[i]} pedido(s)")
         }
     }
 }
