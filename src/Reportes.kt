@@ -1,7 +1,6 @@
 // ====================================================================
-// REPORTES.kt  -- Módulo de REPORTES
+// REPORTES.kt
 // ====================================================================
-
 
 class GestorReportes(
     private val gestorProductos: GestorProductos,
@@ -10,7 +9,7 @@ class GestorReportes(
 ) {
 
     /**
-     * Resumen general: ventas, productos, inventari y pedidos, todo en un solo reporte.
+     * Muestra un resumen general del sistema
      */
     fun mostrarResumenGeneral() {
         try {
@@ -81,7 +80,7 @@ class GestorReportes(
     }
 
     /**
-     * Productos sin stock (agotados) o marcados manualmente como no disponibles.
+     * Muestra los productos agotados o no disponibles.
      */
     private fun mostrarProductosAgotados() {
         val productos = gestorProductos.obtenerProductos()
@@ -102,8 +101,7 @@ class GestorReportes(
     }
 
     /**
-     * Productos con pocas unidades disponibles (por debajo del umbral),
-     * pero que todavía tienen stock.
+     * Muestra los productos con stock bajo.
      */
     private fun mostrarStockBajo(umbral: Int = 5) {
         val productos = gestorProductos.obtenerProductos()

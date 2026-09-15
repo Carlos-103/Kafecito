@@ -1,22 +1,14 @@
 // ====================================================================
-// USUARIO.kt  -- Módulo de USUARIOS / LOGIN
-// Responsable:
+// USUARIO.kt
 // ====================================================================
-// Requerimiento técnico que cubre: Validación de entradas y roles
-//
-// Qué tienes que hacer:
-//   1. Completar el registro y login de usuarios.
-//   2. Validar que el rol sea uno de los 3 permitidos.
-//   3. Validar que la contraseña no esté vacía / cumpla un mínimo.
 
 enum class Rol {
     ADMIN, EMPLEADO, CLIENTE
 }
 
 /**
- * Indica si este rol tiene permiso para modificar el inventario
- * (agregar stock, marcar productos como agotados, etc.).
- * Solo ADMIN y EMPLEADO pueden hacerlo; CLIENTE nunca.
+ * Indica qué roles pueden modificar el inventario.
+ * ADMIN y EMPLEADO tienen permiso; CLIENTE no.
  */
 fun Rol.puedeModificarInventario(): Boolean {
     return this == Rol.ADMIN || this == Rol.EMPLEADO
@@ -30,7 +22,7 @@ data class Usuario(
 
 class GestorUsuarios {
 
-    // Manejo de colecciones: todos los usuarios registrados
+    // Lista de usuarios registrados
     private val usuarios = mutableListOf<Usuario>()
 
     fun registrarUsuario(nombre: String, contrasena: String, rol: Rol) {
@@ -46,13 +38,8 @@ class GestorUsuarios {
             println("Error: ${e.message}")
         }
     }
-
     /**
-     * Registro público (ej. desde el menú inicial de Main.kt).
-     * Todo usuario que se registra por su cuenta entra como CLIENTE
-     * por defecto; no puede elegir su propio rol. Solo un ADMIN
-     * podría crear usuarios EMPLEADO/ADMIN usando la función de
-     * arriba desde un menú administrativo si se implementa después.
+     * Registra un usuario como CLIENTE.
      */
     fun registrarUsuario(nombre: String, contrasena: String) {
         registrarUsuario(nombre, contrasena, Rol.CLIENTE)

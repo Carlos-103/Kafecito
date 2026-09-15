@@ -1,14 +1,6 @@
 // ====================================================================
-// INVENTARIO.kt  -- Módulo de INVENTARIO
-// Responsable:
+// INVENTARIO.kt
 // ====================================================================
-// Requerimiento funcional que cubre:
-//   5. Actualización dinámica de datos durante la ejecución
-//
-// Qué tienes que hacer:
-//   1. Relacionar el stock con el id de un Producto (ver Producto.kt).
-//   2. Implementar descuento de stock al vender.
-//   3. Implementar alerta de stock bajo.
 
 class GestorInventario(
     private val stockMinimo: Int = 5

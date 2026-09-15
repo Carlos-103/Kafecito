@@ -1,15 +1,10 @@
 // ====================================================================
-// MAIN.kt  -- Punto de entrada / INTEGRACIÓN de todos los módulos
+// MAIN.kt
 // ====================================================================
-// Aquí se conectan todos los módulos y se arma el menú según el ROL
-// del usuario que inició sesión.
+
 
 fun main() {
-
-    // ================================================================
-    // CREACIÓN DE LOS GESTORES
-    // ================================================================
-
+    // Creación de gestores
     val gestorUsuarios =
         GestorUsuarios()
 
@@ -28,11 +23,7 @@ fun main() {
             gestorPedidos,
             gestorInventario
         )
-
-    // ================================================================
-    // USUARIOS DE PRUEBA
-    // ================================================================
-
+    // Usuarios de prueba
     gestorUsuarios.registrarUsuario(
         "admin1",
         "1234",
@@ -51,10 +42,7 @@ fun main() {
         Rol.CLIENTE
     )
 
-    // ================================================================
-    // PRODUCTOS DE PRUEBA
-    // ================================================================
-
+    // Productos de prueba
     val capuccino =
         gestorProductos.agregarProducto(
             "Capuccino",
@@ -101,11 +89,10 @@ fun main() {
     }
 
     // ================================================================
-    // BUCLE PRINCIPAL: LOGIN / REGISTRO / LOGOUT
+    // Bucle principal: login, registro y logout
     // ================================================================
-    // Este bucle permite que, al salir del menú de un rol (logout),
-    // el programa regrese a la pantalla de bienvenida en vez de
-    // cerrarse. Solo termina cuando el usuario elige "3. Salir".
+    // Permite volver a la pantalla de bienvenida después de cerrar sesión.
+    // El programa solo termina cuando se selecciona "3. Salir".
 
     var continuarPrograma = true
 
@@ -143,12 +130,12 @@ fun main() {
                 if (usuario == null) {
 
                     // El mensaje de error ya lo imprime iniciarSesion().
-                    // Volvemos a mostrar el menú de bienvenida.
+                    // Se vuelve al menú de bienvenida.
 
                 } else {
 
                     // ================================================
-                    // MENÚ SEGÚN ROL (al salir de aquí = logout)
+                    // Menú según el rol del usuario
                     // ================================================
 
                     when (usuario.rol) {
@@ -230,10 +217,8 @@ fun main() {
     }
 }
 
+// Menú administrador
 
-// ====================================================================
-// MENÚ ADMINISTRADOR
-// ====================================================================
 fun menuAdmin(
     gestorProductos: GestorProductos,
     gestorInventario: GestorInventario,
@@ -267,9 +252,7 @@ fun menuAdmin(
 
         when (readLine()) {
 
-            // ========================================================
-            // AGREGAR PRODUCTO (con stock inicial)
-            // ========================================================
+            // Agregar producto (con stock inicial)
 
             "1" -> {
 
@@ -318,9 +301,7 @@ fun menuAdmin(
                 }
             }
 
-            // ========================================================
-            // LISTAR PRODUCTOS (con inventario)
-            // ========================================================
+            // Listar productos (con inventario)
 
             "2" -> {
 
@@ -329,27 +310,19 @@ fun menuAdmin(
                 )
             }
 
-            // ========================================================
-            // INVENTARIO
-            // ========================================================
-
+            // Inventario
             "3" -> {
 
                 gestorInventario.listarInventario()
             }
-
-            // ========================================================
-            // REPORTES
-            // ========================================================
+            // Reportes
 
             "4" -> {
 
                 gestorReportes.mostrarResumenGeneral()
             }
 
-            // ========================================================
-            // BUSCAR POR NOMBRE
-            // ========================================================
+            // Buscar por nombre
 
             "5" -> {
 
@@ -358,19 +331,13 @@ fun menuAdmin(
                 gestorProductos.buscarPorNombre(nombre)
             }
 
-            // ========================================================
-            // LISTAR DISPONIBLES
-            // ========================================================
+            // Listar disponibles
 
             "6" -> {
 
                 gestorProductos.listarDisponibles()
             }
-
-            // ========================================================
-            // LISTAR POR CATEGORÍA
-            // ========================================================
-
+            // Listar por categoria
             "7" -> {
 
                 print("Categoría: ")
@@ -378,9 +345,7 @@ fun menuAdmin(
                 gestorProductos.listarPorCategoria(categoria)
             }
 
-            // ========================================================
-            // MARCAR NO DISPONIBLE
-            // ========================================================
+            // Marcar no disponible
 
             "8" -> {
 
@@ -389,9 +354,7 @@ fun menuAdmin(
                 gestorProductos.marcarNoDisponible(id)
             }
 
-            // ========================================================
-            // MARCAR DISPONIBLE
-            // ========================================================
+            // Marcar disponible
 
             "9" -> {
 
@@ -400,9 +363,7 @@ fun menuAdmin(
                 gestorProductos.marcarDisponible(id)
             }
 
-            // ========================================================
-            // AGREGAR STOCK (solo ADMIN / EMPLEADO)
-            // ========================================================
+            // Agrega stock (solo ADMIN / EMPLEADO)
 
             "10" -> {
 
@@ -424,9 +385,7 @@ fun menuAdmin(
                 }
             }
 
-            // ========================================================
-            // SALIR
-            // ========================================================
+            // Salir
 
             "0" -> {
 
@@ -447,11 +406,7 @@ fun menuAdmin(
     }
 }
 
-
-
-// ====================================================================
-// MENÚ EMPLEADO
-// ====================================================================
+// Menú empleado
 
 fun menuEmpleado(
     gestorPedidos: GestorPedidos,
@@ -579,10 +534,7 @@ fun menuEmpleado(
     }
 }
 
-
-// ====================================================================
-// MENÚ CLIENTE
-// ====================================================================
+// Menú cliente
 fun menuCliente(
     gestorProductos: GestorProductos,
     gestorPedidos: GestorPedidos,
@@ -608,11 +560,9 @@ fun menuCliente(
         )
  
         when (readLine()) {
- 
-            // ========================================================
-            // VER MENÚ
-            // ========================================================
- 
+
+            // Ver menú
+
             "1" -> {
  
                 gestorProductos.listarProductos(
@@ -620,9 +570,7 @@ fun menuCliente(
                 )
             }
  
-            // ========================================================
-            // REALIZAR PEDIDO
-            // ========================================================
+            //Realizar pedido
  
             "2" -> {
  
@@ -633,10 +581,8 @@ fun menuCliente(
                     usuario
                 )
             }
- 
-            // ========================================================
-            // CONSULTAR PEDIDO
-            // ========================================================
+
+            // Consultar pedido
  
             "3" -> {
  
@@ -682,11 +628,8 @@ fun menuCliente(
         }
     }
 }
- 
- 
-// ====================================================================
-// REALIZAR PEDIDO
-// ====================================================================
+
+// Realizar pedido
  
 fun realizarPedido(
     gestorProductos: GestorProductos,
@@ -707,9 +650,7 @@ fun realizarPedido(
         return
     }
  
-    // ================================================================
-    // CARRITO TEMPORAL
-    // ================================================================
+    // Carrito temporal
  
     val carrito =
         mutableListOf<ItemPedido>()
@@ -831,10 +772,8 @@ fun realizarPedido(
                         )
  
                     } else {
- 
-                        // ====================================================
-                        // BUSCAR SI YA ESTÁ EN EL CARRITO
-                        // ====================================================
+
+                        // Buscar si ya esta en el carrito
  
                         val existente =
                             carrito.find {
@@ -893,9 +832,7 @@ fun realizarPedido(
         }
     }
  
-    // ================================================================
-    // SI EL CARRITO ESTÁ VACÍO
-    // ================================================================
+  //Si el carrito esta vacio
  
     if (carrito.isEmpty()) {
  
@@ -906,9 +843,7 @@ fun realizarPedido(
         return
     }
  
-    // ================================================================
-    // MOSTRAR CARRITO
-    // ================================================================
+    // Mostrar carrito
  
     println()
     println("====================================")
@@ -937,9 +872,7 @@ fun realizarPedido(
  
     println("====================================")
  
-    // ================================================================
-    // CONFIRMAR PEDIDO
-    // ================================================================
+    // Confirmar pedido
  
     print(
         "¿Desea confirmar el pedido? (S/N): "
