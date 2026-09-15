@@ -1,3 +1,6 @@
+// ====================================================================
+// PEDIDO.kt
+// ====================================================================
 enum class EstadoPedido {
     EN_PREPARACION,
     LISTO,
@@ -30,7 +33,7 @@ data class Pedido(
 }
 
 class GestorPedidos {
-
+    // ID que tendrá el próximo pedido
     private val pedidos =
         mutableListOf<Pedido>()
 
@@ -38,9 +41,6 @@ class GestorPedidos {
 
     /**
      * Crea un pedido SIN modificar inventario.
-     *
-     * Se mantiene para compatibilidad con
-     * otros módulos.
      */
     fun crearPedido(
         cliente: String,
@@ -96,9 +96,6 @@ class GestorPedidos {
     /**
      * Crea un pedido y controla automáticamente
      * el inventario.
-     *
-     * Primero verifica TODO el stock.
-     * Solo si todo está disponible se descuenta.
      */
     fun crearPedidoConInventario(
         cliente: String,
@@ -116,10 +113,9 @@ class GestorPedidos {
                 "El pedido debe tener al menos un producto"
             }
 
-            // ========================================================
-            // PASO 1
-            // VERIFICAR TODO EL STOCK
-            // ========================================================
+            // Paso 1
+            // Verificar todo en stock
+
 
             for (item in items) {
 
@@ -133,7 +129,7 @@ class GestorPedidos {
 
                     return null
                 }
-
+// Consultamos cuánto stock hay disponible
                 val disponible =
                     inventario.consultarStock(
                         item.producto.id
@@ -177,10 +173,8 @@ class GestorPedidos {
                 }
             }
 
-            // ========================================================
-            // PASO 2
-            // DESCONTAR STOCK
-            // ========================================================
+            // Paso 2
+            //Descontar stock
 
             for (item in items) {
 
@@ -201,10 +195,8 @@ class GestorPedidos {
                 }
             }
 
-            // ========================================================
-            // PASO 3
-            // CREAR PEDIDO
-            // ========================================================
+            // Paso 3
+            //Crear pedido
 
             val nuevo = Pedido(
                 id = siguienteId,

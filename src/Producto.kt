@@ -1,3 +1,6 @@
+// ====================================================================
+// PRODUCTO.kt
+// ====================================================================
 data class Producto(
     val id: Int,
     var nombre: String,
@@ -10,7 +13,7 @@ class GestorProductos {
 
     private val productos =
         mutableListOf<Producto>()
-
+    // ID que tendrá el próximo producto
     private var siguienteId = 1
 
     /**
