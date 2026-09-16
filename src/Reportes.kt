@@ -1,7 +1,32 @@
 // ====================================================================
 // REPORTES.kt
 // ====================================================================
+/**
+ * Define las alertas que puede mostrar el sistema.
+ * Alerta sirve como base y las demás clases adaptan el mensaje
+ * según el tipo de alerta.
+ */
+interface Alertable {
+    fun mostrar()
+}
 
+open class Alerta(protected val mensaje: String) : Alertable {
+    override fun mostrar() {
+        println(mensaje)
+    }
+}
+
+class AlertaAgotado(mensaje: String) : Alerta(mensaje) {
+    override fun mostrar() {
+        println("🔴 $mensaje")
+    }
+}
+
+class AlertaStockBajo(mensaje: String) : Alerta(mensaje) {
+    override fun mostrar() {
+        println("🟡 $mensaje")
+    }
+}
 class GestorReportes(
     private val gestorProductos: GestorProductos,
     private val gestorPedidos: GestorPedidos,
@@ -117,9 +142,10 @@ class GestorReportes(
             return
         }
 
-        println("\n⚠ Productos agotados (${agotados.size}):")
-        agotados.forEach { producto ->
-            println("- ${producto.nombre} (ID: ${producto.id})")
+        println("\nProductos agotados (${agotados.size}):")
+        for (producto in agotados) {
+            val alerta: Alertable = AlertaAgotado("${producto.nombre} (ID: ${producto.id})")
+            alerta.mostrar()
         }
     }
 
@@ -140,11 +166,12 @@ class GestorReportes(
             println("\nProductos con stock bajo: ninguno.")
             return
         }
-
-        println("\n⚠ Productos con stock bajo (${stockBajo.size}):")
+        println("\nProductos con stock bajo (${stockBajo.size}):")
         for (producto in stockBajo) {
             val stock = gestorInventario.consultarStock(producto.id)
-            println("- ${producto.nombre}: $stock unidades")
+            val alerta: Alertable = AlertaStockBajo("${producto.nombre}: $stock unidades")
+            alerta.mostrar()
+
         }
     }
 
