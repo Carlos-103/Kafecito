@@ -19,3 +19,10 @@ El sistema permite gestionar usuarios, productos, inventario y pedidos, además 
 - Kotlin
 - Consola (CLI)
 - Programación Orientada a Objetos (POO)
+
+## Hecho por:
+-Carlos David Martínez Ventura MV120141 
+-Carlos Alberto Alfaro Espinoza AE220430 
+-Ricardo José Aguillón González AG242725 
+-Kevin Antonio Flores Alvarado FA251339 
+-José Antonio González Oliva GO231492
